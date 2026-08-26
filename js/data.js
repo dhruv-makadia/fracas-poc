@@ -1,0 +1,365 @@
+window.SEED = {
+  "products": [
+    {
+      "id": "prod_tread",
+      "name": "TreadSpec",
+      "desc": "Wheel tread inspection system"
+    },
+    {
+      "id": "prod_wheel",
+      "name": "WheelSpec",
+      "desc": "Wheel profile measurement system"
+    },
+    {
+      "id": "prod_groove",
+      "name": "GrooveSpec",
+      "desc": "Groove depth measurement system"
+    }
+  ],
+  "variants": [
+    {
+      "id": "var_tread_20",
+      "productId": "prod_tread",
+      "name": "TreadSpec 2.0"
+    },
+    {
+      "id": "var_tread_25",
+      "productId": "prod_tread",
+      "name": "TreadSpec 2.5"
+    },
+    {
+      "id": "var_wheel_10",
+      "productId": "prod_wheel",
+      "name": "WheelSpec 1.0"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "n_cbox",
+      "variantId": "var_tread_20",
+      "parentId": null,
+      "type": "subsystem",
+      "name": "Control Box",
+      "symptoms": [
+        "No Power-On",
+        "Intermittent Comms Loss"
+      ],
+      "modes": [
+        "Water Ingress",
+        "Connector Damage"
+      ]
+    },
+    {
+      "id": "n_chassis",
+      "variantId": "var_tread_20",
+      "parentId": "n_cbox",
+      "type": "component",
+      "name": "Chassis",
+      "symptoms": [
+        "Physical Damage",
+        "Seal Failure"
+      ],
+      "modes": [
+        "Corrosion",
+        "Impact Damage"
+      ]
+    },
+    {
+      "id": "n_computer",
+      "variantId": "var_tread_20",
+      "parentId": "n_cbox",
+      "type": "component",
+      "name": "Computer",
+      "symptoms": [
+        "Boot Failure (Boot Loop)",
+        "OS Crash",
+        "No Video Output"
+      ],
+      "modes": [
+        "Firmware Corruption",
+        "Storage Failure",
+        "Electrical Event (ESD, Short)"
+      ]
+    },
+    {
+      "id": "n_ethsw",
+      "variantId": "var_tread_20",
+      "parentId": "n_cbox",
+      "type": "component",
+      "name": "Ethernet Switch",
+      "symptoms": [
+        "Port Failure",
+        "Packet Loss"
+      ],
+      "modes": [
+        "Electrical Event (ESD, Short)",
+        "Thermal Stress"
+      ]
+    },
+    {
+      "id": "n_psu",
+      "variantId": "var_tread_20",
+      "parentId": "n_cbox",
+      "type": "component",
+      "name": "Power Supply",
+      "symptoms": [
+        "No Output Voltage",
+        "Voltage Out of Spec"
+      ],
+      "modes": [
+        "Capacitor Failure",
+        "Electrical Event (ESD, Short)",
+        "Corrosion"
+      ]
+    },
+    {
+      "id": "n_sensor",
+      "variantId": "var_tread_20",
+      "parentId": null,
+      "type": "subsystem",
+      "name": "Sensor Array",
+      "symptoms": [
+        "Trigger Input Failure",
+        "No Measurement Data"
+      ],
+      "modes": [
+        "Cable Fatigue",
+        "Misalignment"
+      ]
+    },
+    {
+      "id": "n_laser",
+      "variantId": "var_tread_20",
+      "parentId": "n_sensor",
+      "type": "component",
+      "name": "Laser Module",
+      "symptoms": [
+        "No Beam Output",
+        "Beam Degradation"
+      ],
+      "modes": [
+        "Diode Wear-Out",
+        "Contamination (Optics)"
+      ]
+    },
+    {
+      "id": "n_camera",
+      "variantId": "var_tread_20",
+      "parentId": "n_sensor",
+      "type": "component",
+      "name": "Camera",
+      "symptoms": [
+        "No Image",
+        "Image Noise / Artifacts"
+      ],
+      "modes": [
+        "Sensor Failure",
+        "Contamination (Optics)",
+        "Connector Damage"
+      ]
+    },
+    {
+      "id": "n_wenc",
+      "variantId": "var_wheel_10",
+      "parentId": null,
+      "type": "subsystem",
+      "name": "Encoder Assembly",
+      "symptoms": [
+        "Trigger Input Failure",
+        "Count Drift"
+      ],
+      "modes": [
+        "Bearing Wear",
+        "Cable Fatigue"
+      ]
+    },
+    {
+      "id": "n_wencm",
+      "variantId": "var_wheel_10",
+      "parentId": "n_wenc",
+      "type": "component",
+      "name": "Encoder Module",
+      "symptoms": [
+        "No Pulse Output"
+      ],
+      "modes": [
+        "Electrical Event (ESD, Short)",
+        "Bearing Wear"
+      ]
+    }
+  ],
+  "dispositions": [
+    {
+      "id": "d_rts",
+      "label": "Return to Stock",
+      "retired": false
+    },
+    {
+      "id": "d_rework",
+      "label": "Rework",
+      "retired": false
+    },
+    {
+      "id": "d_scrapf",
+      "label": "Scrap (failure)",
+      "retired": false
+    },
+    {
+      "id": "d_scrapo",
+      "label": "Scrap (obsolete)",
+      "retired": false
+    },
+    {
+      "id": "d_engrev",
+      "label": "Engineer Review",
+      "retired": false
+    },
+    {
+      "id": "d_rma",
+      "label": "Return to Manufacturing (RMA)",
+      "retired": false
+    }
+  ],
+  "userAssignments": [
+    {
+      "user": "T. Therrien",
+      "actor": "Engineering_Administrator"
+    },
+    {
+      "user": "A. Engineer",
+      "actor": "Engineering_Representative"
+    },
+    {
+      "user": "Q. Inspector",
+      "actor": "Failure_Reporter"
+    },
+    {
+      "user": "F. Ledger",
+      "actor": "Finance_Representative"
+    }
+  ],
+  "reports": [
+    {
+      "id": "FR-2026-0001",
+      "reporter": "Q. Inspector",
+      "date": "2026-07-14",
+      "origin": "Field Return",
+      "ticket": "CRM-4821",
+      "customer": "Northline Rail",
+      "notes": "Unit returned after storm event at wayside site.",
+      "productId": "prod_tread",
+      "variantId": "var_tread_20",
+      "parts": [
+        {
+          "nodeId": "n_psu",
+          "nodeName": "Power Supply",
+          "nodePath": "Control Box / Power Supply",
+          "nodeType": "component",
+          "partNumber": "PS-2200 Rev C",
+          "serial": "SN-88214",
+          "mfg": "VoltWorks",
+          "mfgSerial": "VW-77120",
+          "symptoms": [
+            "No Output Voltage"
+          ],
+          "modes": [
+            "Electrical Event (ESD, Short)"
+          ],
+          "notes": "Scorch marks near input filter.",
+          "dispositionId": "d_scrapf"
+        },
+        {
+          "nodeId": "n_computer",
+          "nodeName": "Computer",
+          "nodePath": "Control Box / Computer",
+          "nodeType": "component",
+          "partNumber": "CPU-9100 Rev A",
+          "serial": "SN-10331",
+          "mfg": "EdgeCompute",
+          "mfgSerial": "EC-55019",
+          "symptoms": [
+            "Boot Failure (Boot Loop)"
+          ],
+          "modes": [
+            "Firmware Corruption"
+          ],
+          "notes": "Recovered after reflash on bench.",
+          "dispositionId": "d_rework"
+        }
+      ],
+      "corrections": []
+    },
+    {
+      "id": "FR-2026-0002",
+      "reporter": "Q. Inspector",
+      "date": "2026-08-02",
+      "origin": "New-Build QC",
+      "ticket": "QC-0192",
+      "customer": "\u2014",
+      "notes": "Failed outgoing QC on optics bench.",
+      "productId": "prod_tread",
+      "variantId": "var_tread_20",
+      "parts": [
+        {
+          "nodeId": "n_camera",
+          "nodeName": "Camera",
+          "nodePath": "Sensor Array / Camera",
+          "nodeType": "component",
+          "partNumber": "CAM-410 Rev B",
+          "serial": "SN-20455",
+          "mfg": "OptiSense",
+          "mfgSerial": "OS-31877",
+          "symptoms": [
+            "Image Noise / Artifacts"
+          ],
+          "modes": [
+            "Contamination (Optics)"
+          ],
+          "notes": "Dust under cover glass.",
+          "dispositionId": "d_rma"
+        }
+      ],
+      "corrections": []
+    },
+    {
+      "id": "FR-2026-0003",
+      "reporter": "Q. Inspector",
+      "date": "2026-08-11",
+      "origin": "Field Return",
+      "ticket": "CRM-4903",
+      "customer": "Southgate Metro",
+      "notes": "Encoder counts drifting after 14 months in service.",
+      "productId": "prod_wheel",
+      "variantId": "var_wheel_10",
+      "parts": [
+        {
+          "nodeId": "n_wencm",
+          "nodeName": "Encoder Module",
+          "nodePath": "Encoder Assembly / Encoder Module",
+          "nodeType": "component",
+          "partNumber": "ENC-300 Rev D",
+          "serial": "SN-66102",
+          "mfg": "RotaTek",
+          "mfgSerial": "RT-90112",
+          "symptoms": [
+            "No Pulse Output"
+          ],
+          "modes": [
+            "Bearing Wear"
+          ],
+          "notes": "",
+          "dispositionId": "d_engrev"
+        }
+      ],
+      "corrections": []
+    }
+  ],
+  "audit": [
+    {
+      "ts": "2026-08-01 09:12",
+      "user": "T. Therrien",
+      "action": "Seed",
+      "detail": "Initial catalog configuration loaded"
+    }
+  ]
+};
