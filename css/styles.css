@@ -50,6 +50,8 @@ input,select,textarea{font:inherit;color:var(--ink)}
 .hidden{display:none!important}
 svg.ico{width:18px;height:18px;flex-shrink:0;stroke:currentColor;fill:none;
   stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+svg.ico-sm{width:15px;height:15px;flex-shrink:0;stroke:currentColor;fill:none;
+  stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;display:block}
 
 /* ---------- signature: tread-groove rule ----------
    TraXtion reads tire tread; the app's one ornament is a groove band. */
@@ -191,7 +193,8 @@ table.tbl th{font-family:var(--mono);font-size:10.5px;letter-spacing:.09em;text-
   white-space:nowrap;cursor:pointer;user-select:none}
 table.tbl th.nosort{cursor:default}
 table.tbl td{padding:10px;border-bottom:1px solid var(--line-2);vertical-align:top}
-table.tbl tbody tr.rowlink:hover{background:var(--brand-tint);cursor:pointer}
+table.tbl.hoverable tbody tr:hover{background:var(--sunken)}
+table.tbl td.act-cell,table.tbl th.act-cell{text-align:center;width:1%;white-space:nowrap}
 .empty{padding:28px;text-align:center;color:var(--slate);font-size:14px}
 
 /* pills / badges */
@@ -233,6 +236,8 @@ table.tbl tbody tr.rowlink:hover{background:var(--brand-tint);cursor:pointer}
 .icon-btn{border:1px solid var(--line);background:#fff;border-radius:5px;padding:2px 8px;font-size:11.5px;
   color:var(--ink)}
 .icon-btn:hover{border-color:var(--slate)}
+.icon-btn.act{display:inline-grid;place-items:center;padding:5px;color:var(--slate)}
+.icon-btn.act:hover{border-color:var(--brand);background:var(--brand-tint);color:var(--brand-deep)}
 .icon-btn.red:hover{border-color:var(--red);color:var(--red)}
 .tree .pickbox{width:16px;height:16px;accent-color:var(--brand-deep)}
 input[type=checkbox]{accent-color:var(--brand-deep)}

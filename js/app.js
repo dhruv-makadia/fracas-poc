@@ -149,6 +149,12 @@ const ICONS = {
   users:'<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.2"/><path d="M2.8 19c0-3 2.8-4.7 6.2-4.7s6.2 1.7 6.2 4.7"/><path d="M16.4 11.1a3 3 0 1 0-1.1-5.6"/><path d="M18 19c0-2.2-.8-3.7-2.3-4.5"/></svg>',
   data:'<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4H8a2 2 0 0 0-2 2v3.4L4 12l2 2.6V18a2 2 0 0 0 2 2h1"/><path d="M15 4h1a2 2 0 0 1 2 2v3.4l2 2.6-2 2.6V18a2 2 0 0 1-2 2h-1"/></svg>'
 };
+/* row-action icons for the report list — pen for the actor that may correct,
+   eye for everyone else (see canCorrect / ROLES) */
+const ACTION_ICONS = {
+  view:'<svg class="ico-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-6.6 10-6.6S22 12 22 12s-3.6 6.6-10 6.6S2 12 2 12z"/><circle cx="12" cy="12" r="2.9"/></svg>',
+  edit:'<svg class="ico-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 19.5h3.6L19.3 8.3a1.9 1.9 0 0 0 0-2.7l-.9-.9a1.9 1.9 0 0 0-2.7 0L4.5 15.9v3.6z"/><path d="M14.3 6.7l3.6 3.6"/></svg>',
+};
 const MS_LOGO = '<svg viewBox="0 0 21 21" aria-hidden="true">'
   + '<rect x="1" y="1" width="9" height="9" fill="#f25022"/>'
   + '<rect x="11" y="1" width="9" height="9" fill="#7fba00"/>'
@@ -627,7 +633,7 @@ function viewDispositions(){
         <button class="icon-btn" ${i===0?'disabled':''} onclick="moveDisp(${i},-1)">↑</button>
         <button class="icon-btn" ${i===DB.dispositions.length-1?'disabled':''} onclick="moveDisp(${i},1)">↓</button>
         <button class="icon-btn" onclick="editDisp('${d.id}')">Edit</button>
-        <button class="icon-btn ${d.retired?'':'red'}" onclick="toggleDisp('${d.id}')">${d.retired?'Reinstate':'Retire'}</button>
+        <button class="icon-btn ${d.retired?'':'btn danger'}" onclick="toggleDisp('${d.id}')">${d.retired?'Reinstate':'Retire'}</button>
       </td>
     </tr>`).join('');
   return `
@@ -960,21 +966,28 @@ function viewReports(){
   rows.sort((a,b)=> (val(a)>val(b)?1:val(a)<val(b)?-1:0)*dir );
 
   const th=(k,lbl)=>`<th onclick="setSort('${k}')">${lbl}${state.sort.key===k?(dir>0?' ▲':' ▼'):''}</th>`;
+  /* the pen goes to the actor that may correct a report; everyone else gets the eye.
+     Both open the same detail view — the correct/read-only gate lives there (canCorrect). */
+  const mayEdit=canCorrect();
+  const actLbl = mayEdit ? 'Open to correct' : 'View report';
+  const actIco = mayEdit ? ACTION_ICONS.edit : ACTION_ICONS.view;
   const trs=rows.map(r=>`
-    <tr class="rowlink" onclick="openReport('${r.id}')">
+    <tr>
       <td>${esc(r.id)}</td>
       <td>${esc(r.date)}</td>
       <td>${esc(prodById(r.productId)?.name||'?')}</td>
       <td>${esc(varById(r.variantId)?.name||'?')}</td>
       <td>${esc(r.origin)}</td>
       <td>${esc(r.customer)}</td>
-      <td style="text-align:center">${r.parts.length}</td>
+      <td>${r.parts.length}</td>
       <td>${r.corrections.length?`<span class="badge disp">corrected ×${r.corrections.length}</span>`:''}</td>
+      <td><button class="icon-btn" onclick="openReport('${r.id}')"
+        title="${actLbl} ${esc(r.id)}" aria-label="${actLbl} ${esc(r.id)}">${actIco}</button></td>
     </tr>`).join('');
 
   return `
   <h2 class="page-title">Failure reports</h2>
-  <p class="page-sub">Tabulated view — filter and sort by date, product, variant, origin, customer. Click a row for full detail.</p>
+  <p class="page-sub">Tabulated view — filter and sort by date, product, variant, origin, customer. Use the action button for full detail.</p>
   <div class="panel"><div class="panel-b">
     <div class="grid-form" style="margin-bottom:12px">
       <div><label class="f">Search (ID / customer / ticket)</label>
@@ -993,11 +1006,12 @@ function viewReports(){
       <div><label class="f">From</label><input type="date" value="${esc(f.from)}" onchange="setFilter('from',this.value)"></div>
       <div><label class="f">To</label><input type="date" value="${esc(f.to)}" onchange="setFilter('to',this.value)"></div>
     </div>
-    <table class="tbl"><thead><tr>
+    <table class="tbl hoverable"><thead><tr>
       ${th('id','Report')}${th('date','Date')}${th('product','Product')}${th('variant','Variant')}
       ${th('origin','Origin')}${th('customer','Customer')}${th('parts','Parts')}<th class="nosort"></th>
+      <th class="nosort act-cell">Action</th>
     </tr></thead>
-    <tbody>${trs || '<tr><td colspan="8" class="empty">No reports match these filters.</td></tr>'}</tbody></table>
+    <tbody>${trs || '<tr><td colspan="9" class="empty">No reports match these filters.</td></tr>'}</tbody></table>
   </div></div>`;
 }
 function setFilter(k,v){ state.filters[k]=v; renderView(); }
