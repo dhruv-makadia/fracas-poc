@@ -97,7 +97,7 @@ function confirmBox(title, msg, onYes){
 const ROLES = {
   Engineering_Administrator: {
     label:'Engineering Administrator',
-    nav:['reports','catalog','audit','dispositions'],
+    nav:['catalog','reports','audit','dispositions'],   // nav[0] is this role's landing view
     canCorrect:false,
   },
   Engineering_Representative: {
@@ -439,7 +439,7 @@ function treePanel(v){
     </div>
     <div class="panel-b tree">
       ${nodesOf(v.id).length ? renderKids(null) : '<div class="empty">Empty tree. Add a root subsystem or component.</div>'}
-      <p class="flow-note" style="margin:12px 0 0">Click a node name to configure its failure symptoms &amp; modes. Names must be unique within this variant (FR-1.4). Subsystems can nest; components are leaf nodes.</p>
+      <p class="flow-note" style="margin:12px 0 0">Click a node name to configure its failure symptoms &amp; modes. Names must be unique within this variant. Subsystems can nest; components are leaf nodes.</p>
     </div>
   </div>`;
 }
@@ -454,12 +454,12 @@ function nodeDetailPanel(n){
     <div class="panel-b">
       <div class="cols cols-2">
         <div>
-          <label class="f">Failure symptoms (FR-1.5)</label>
+          <label class="f">Failure symptoms</label>
           <div style="margin-bottom:8px">${chipList(n.symptoms,'symptoms')}</div>
           <button class="btn sm line" onclick="addAssign('${n.id}','symptoms')">+ Add symptom</button>
         </div>
         <div>
-          <label class="f">Failure modes (FR-1.6)</label>
+          <label class="f">Failure modes</label>
           <div style="margin-bottom:8px">${chipList(n.modes,'modes')}</div>
           <button class="btn sm line" onclick="addAssign('${n.id}','modes')">+ Add mode</button>
         </div>
@@ -620,7 +620,7 @@ function removeAssign(nodeId, kind, idx){
 function viewDispositions(){
   const rows=DB.dispositions.map((d,i)=>`
     <tr>
-      <td class="mono muted">${i+1}</td>
+      <td class="muted">${i+1}</td>
       <td>${d.retired?`<span class="badge retired">${esc(d.label)}</span>`:esc(d.label)}</td>
       <td>${d.retired?'<span class="muted">Retired</span>':'<span style="color:var(--brand-deep)">Active</span>'}</td>
       <td style="white-space:nowrap">
@@ -633,7 +633,7 @@ function viewDispositions(){
   return `
   <h2 class="page-title">Disposition list</h2>
   <p class="page-sub">One shared, system-wide list used by every subsystem/component in every failure report. Retired values stay for history but can't be picked on new reports.</p>
-  <div class="panel" style="max-width:720px">
+  <div class="panel">
     <div class="panel-h"><h3>Entries</h3><span class="spacer"></span>
       <button class="btn primary sm" onclick="addDisp()">+ Add entry</button></div>
     <div class="panel-b">
@@ -677,7 +677,7 @@ function viewUsers(){
   return `
   <h2 class="page-title">User access</h2>
   <p class="page-sub">FR-1.8 · User-to-actor assignment (in production this is coordinated with IT via Entra ID; here it's a simple demo table).</p>
-  <div class="panel" style="max-width:720px">
+  <div class="panel">
     <div class="panel-h"><h3>Assignments</h3><span class="spacer"></span>
       <button class="btn primary sm" onclick="addUser()">+ Add user</button></div>
     <div class="panel-b"><table class="tbl">
@@ -706,8 +706,8 @@ function delUser(i){
 /* ----- audit trail (FR-1.9 / NFR-4) ----- */
 function viewAudit(){
   const rows=DB.audit.map(a=>`
-    <tr class="audit-row"><td class="mono ts muted">${esc(a.ts)}</td>
-      <td class="mono">${esc(a.user)}</td><td><strong>${esc(a.action)}</strong></td><td>${esc(a.detail)}</td></tr>`).join('');
+    <tr class="audit-row"><td class="ts muted">${esc(a.ts)}</td>
+      <td>${esc(a.user)}</td><td><strong>${esc(a.action)}</strong></td><td>${esc(a.detail)}</td></tr>`).join('');
   return `
   <h2 class="page-title">Audit logs</h2>
   <p class="page-sub">Every configuration change and report action, attributed and timestamped.</p>
@@ -722,7 +722,7 @@ function viewData(){
   return `
   <h2 class="page-title">Data (JSON)</h2>
   <p class="page-sub">The POC keeps its working copy in your browser (localStorage), seeded from <span class="mono">data.json</span>. Export the current state, edit it, and import it back.</p>
-  <div class="panel" style="max-width:820px"><div class="panel-b">
+  <div class="panel"><div class="panel-b">
     <button class="btn primary" onclick="exportJSON()">Export current data as JSON</button>
     <button class="btn line" onclick="importJSON()">Import JSON…</button>
     <button class="btn danger" onclick="resetDB()">Reset to seed data</button>
@@ -962,13 +962,13 @@ function viewReports(){
   const th=(k,lbl)=>`<th onclick="setSort('${k}')">${lbl}${state.sort.key===k?(dir>0?' ▲':' ▼'):''}</th>`;
   const trs=rows.map(r=>`
     <tr class="rowlink" onclick="openReport('${r.id}')">
-      <td class="mono">${esc(r.id)}</td>
-      <td class="mono">${esc(r.date)}</td>
+      <td>${esc(r.id)}</td>
+      <td>${esc(r.date)}</td>
       <td>${esc(prodById(r.productId)?.name||'?')}</td>
       <td>${esc(varById(r.variantId)?.name||'?')}</td>
       <td><span class="badge ${r.origin==='Field Return'?'origin-field':'origin-qc'}">${esc(r.origin)}</span></td>
       <td>${esc(r.customer)}</td>
-      <td class="mono" style="text-align:center">${r.parts.length}</td>
+      <td style="text-align:center">${r.parts.length}</td>
       <td>${r.corrections.length?`<span class="badge disp">corrected ×${r.corrections.length}</span>`:''}</td>
     </tr>`).join('');
 
@@ -1046,7 +1046,7 @@ function viewReportDetail(){
   const corrLog = orig.corrections.length ? `
     <div class="panel"><div class="panel-h"><h3>Correction log (FR-2.10)</h3></div><div class="panel-b">
       <table class="tbl"><thead><tr><th class="nosort">When</th><th class="nosort">Who</th><th class="nosort">Change</th></tr></thead>
-      <tbody>${orig.corrections.map(c=>`<tr><td class="mono muted">${esc(c.ts)}</td><td class="mono">${esc(c.user)}</td><td>${esc(c.change)}</td></tr>`).join('')}</tbody></table>
+      <tbody>${orig.corrections.map(c=>`<tr><td class="muted">${esc(c.ts)}</td><td>${esc(c.user)}</td><td>${esc(c.change)}</td></tr>`).join('')}</tbody></table>
     </div></div>`:'';
 
   return `
@@ -1273,7 +1273,7 @@ function viewFinance(){
     || '<div class="empty">No data in this date range.</div>';
 
   const detail=rows.sort((a,b)=>a.date<b.date?1:-1).map(x=>`
-    <tr><td class="mono">${esc(x.date)}</td><td class="mono">${esc(x.report)}</td>
+    <tr><td>${esc(x.date)}</td><td>${esc(x.report)}</td>
       <td>${esc(x.product)}</td><td>${esc(x.component)}</td>
       <td><span class="badge disp">${esc(x.disp)}</span></td></tr>`).join('');
 

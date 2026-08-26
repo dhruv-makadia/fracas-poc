@@ -35,13 +35,14 @@ that actor sees and whether it may correct a report:
 
 | Role | Nav items | Can correct a report |
 |---|---|---|
-| **Engineering Administrator** (default) | Failure reports · Products & variants · Audit logs · Disposition list | no |
+| **Engineering Administrator** (default) | Products & variants · Failure reports · Audit logs · Disposition list | no |
 | **Engineering Representative** | Failure reports | **yes** |
 | **Failure Reporter** | Failure reports · New report | no |
 | **Finance Representative** | Disposition summary | no |
 
+Each role lands on its **first** nav item — Engineering Administrator opens on Products & variants.
 Switching role closes any open report, discards an in-progress correction (after confirming), and
-lands on the new role's first nav item if the current view is not one it may open.
+falls back to that landing view if the current view is not one the new role may open.
 
 ## Navigation
 
