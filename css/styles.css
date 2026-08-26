@@ -163,8 +163,8 @@ svg.ico{width:18px;height:18px;flex-shrink:0;stroke:currentColor;fill:none;
 .btn{background:var(--navy);color:#fff;border:none;border-radius:var(--r-sm);padding:9px 15px;
   font-size:13.5px;font-weight:500}
 .btn:hover{background:var(--navy-2)}
-.btn.primary{background:var(--brand);color:#12300a;font-weight:600}
-.btn.primary:hover{background:var(--brand-deep);color:#fff}
+.btn.primary{background:#fff;color:var(--brand-deep);border:1px solid var(--brand);font-weight:600}
+.btn.primary:hover{background:var(--brand);color:#12300a;border-color:var(--brand)}
 .btn.sm{padding:5px 10px;font-size:12.5px}
 .btn.line{background:#fff;color:var(--ink);border:1px solid var(--line)}
 .btn.line:hover{border-color:var(--slate)}

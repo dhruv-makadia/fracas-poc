@@ -706,7 +706,7 @@ function delUser(i){
 /* ----- audit trail (FR-1.9 / NFR-4) ----- */
 function viewAudit(){
   const rows=DB.audit.map(a=>`
-    <tr class="audit-row"><td class="ts muted">${esc(a.ts)}</td>
+    <tr class="audit-row"><td>${esc(a.ts)}</td>
       <td>${esc(a.user)}</td><td><strong>${esc(a.action)}</strong></td><td>${esc(a.detail)}</td></tr>`).join('');
   return `
   <h2 class="page-title">Audit logs</h2>
@@ -966,7 +966,7 @@ function viewReports(){
       <td>${esc(r.date)}</td>
       <td>${esc(prodById(r.productId)?.name||'?')}</td>
       <td>${esc(varById(r.variantId)?.name||'?')}</td>
-      <td><span class="badge ${r.origin==='Field Return'?'origin-field':'origin-qc'}">${esc(r.origin)}</span></td>
+      <td>${esc(r.origin)}</td>
       <td>${esc(r.customer)}</td>
       <td style="text-align:center">${r.parts.length}</td>
       <td>${r.corrections.length?`<span class="badge disp">corrected ×${r.corrections.length}</span>`:''}</td>
