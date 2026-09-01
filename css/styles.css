@@ -177,10 +177,16 @@ svg.ico-sm{width:15px;height:15px;flex-shrink:0;stroke:currentColor;fill:none;
 /* half-width tree cell: the node toolbar overlays on hover instead of taking
    width in every row, so deep rows still fit without sideways scrolling */
 .catalog-grid .node-row{position:relative}
-.catalog-grid .node-row .tools{position:absolute;right:3px;top:50%;transform:translateY(-50%);
-  margin-left:0;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-sm);
-  padding:2px 3px;box-shadow:0 1px 4px rgba(20,41,58,.14);pointer-events:none}
+/* The overlay is a strip of the row itself, not a chip floating over it: a chip
+   with its own border+padding stands taller than the 28px row, so a selected row
+   and the hovered row under it collided. Inheriting the row's own background
+   keeps the strip within the row on both the tinted and hovered states. */
+.catalog-grid .node-row .tools{position:absolute;right:4px;top:50%;transform:translateY(-50%);
+  margin-left:0;padding-left:14px;background:inherit;border-radius:var(--r-sm);pointer-events:none}
+.catalog-grid .node-row .tools .icon-btn.act{padding:4px}
 .catalog-grid .node-row:hover .tools,.catalog-grid .node-row.on .tools{pointer-events:auto}
+/* whichever row is pointed at paints over its neighbours */
+.catalog-grid .node-row:hover{z-index:2}
 
 /* collapsible panel header */
 .panel-h .collapse-btn{border:none;background:none;padding:2px;margin:0 -2px 0 -4px;color:var(--slate);
@@ -389,8 +395,8 @@ hr.sep{border:none;border-top:1px solid var(--line);margin:14px 0}
   .part-card .ph{flex-wrap:wrap;row-gap:6px}
   .node-row{flex-wrap:wrap;row-gap:4px}
   .node-row .tools{margin-left:0;width:100%;justify-content:flex-start;flex-wrap:wrap}
-  .catalog-grid .node-row .tools{position:static;transform:none;background:none;border:none;
-    box-shadow:none;padding:0;pointer-events:auto}
+  .catalog-grid .node-row .tools{position:static;transform:none;background:none;
+    padding-left:0;pointer-events:auto}
   .part-card .ph h4{font-size:13px}
   .bar-row .lbl{flex-basis:110px}
   table.tbl{min-width:440px;font-size:13px}
