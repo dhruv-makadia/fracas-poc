@@ -155,6 +155,7 @@ const ACTION_ICONS = {
   view:'<svg class="ico-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-6.6 10-6.6S22 12 22 12s-3.6 6.6-10 6.6S2 12 2 12z"/><circle cx="12" cy="12" r="2.9"/></svg>',
   edit:'<svg class="ico-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 19.5h3.6L19.3 8.3a1.9 1.9 0 0 0 0-2.7l-.9-.9a1.9 1.9 0 0 0-2.7 0L4.5 15.9v3.6z"/><path d="M14.3 6.7l3.6 3.6"/></svg>',
 };
+const CHEVRON = '<svg class="ico-sm chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9.5l6 6 6-6"/></svg>';
 const MS_LOGO = '<svg viewBox="0 0 21 21" aria-hidden="true">'
   + '<rect x="1" y="1" width="9" height="9" fill="#f25022"/>'
   + '<rect x="11" y="1" width="9" height="9" fill="#7fba00"/>'
@@ -183,6 +184,7 @@ const canSeeView   = (r,v) => roleDef(r).nav.includes(v);
 const state = {
   user:null, role:DEFAULT_ROLE, view:defaultViewFor(DEFAULT_ROLE),
   sel:{ productId:null, variantId:null, nodeId:null }, // admin catalog selection
+  collapsed:{ products:false, variants:false },        // catalog panels folded to their header
   draft:null,          // failure report draft
   openReportId:null,   // detail view
   detailFocus:null,    // node focused in detail master-detail
@@ -384,34 +386,46 @@ function viewCatalog(){
     </button>`).join('') || '<div class="empty">No variants yet.</div>')
     : '<div class="empty">Select a product.</div>';
 
+  const n = state.sel.nodeId ? nodeById(state.sel.nodeId) : null;
+
   return `
   <h2 class="page-title">Products &amp; variants</h2>
-  <p class="page-sub">Product Family → Variant → hierarchical Tree of Parts, with per-node failure symptoms &amp; modes.</p>
-  <div class="cols cols-3">
-    <div class="panel">
-      <div class="panel-h"><h3>Products</h3><span class="spacer"></span>
-        <button class="btn primary sm" onclick="addProduct()">+ Add</button></div>
-      <div class="panel-b sel-list">${prodList}
-        ${p?`<hr class="sep">
-        <button class="btn line sm" onclick="editProduct('${p.id}')">Rename</button>
-        <button class="btn danger sm" onclick="delProduct('${p.id}')">Remove</button>`:''}
-      </div>
-    </div>
-    <div class="panel">
-      <div class="panel-h"><h3>Variants</h3><span class="spacer"></span>
-        ${p?`<button class="btn primary sm" onclick="addVariant()">+ Add</button>`:''}</div>
-      <div class="panel-b sel-list">${varList}
-        ${v?`<hr class="sep">
-        <button class="btn line sm" onclick="editVariant('${v.id}')">Rename</button>
-        <button class="btn danger sm" onclick="delVariant('${v.id}')">Remove</button>`:''}
-      </div>
-    </div>
-    <div>
-      ${v ? treePanel(v) : `<div class="panel"><div class="empty">Select a product and variant to build its tree of parts.</div></div>`}
-      ${state.sel.nodeId && nodeById(state.sel.nodeId) ? nodeDetailPanel(nodeById(state.sel.nodeId)) : ''}
-    </div>
+  <p class="page-sub">Product Family → Variant → hierarchical Tree of Parts, with per-node failure symptoms &amp; modes.
+    Collapse the two upper panels once a variant is picked — the tree and node panel then own the view.</p>
+  <div class="cols catalog-grid">
+    ${collapsiblePanel('products', 'Products', p && p.name, `
+      <button class="btn primary sm" onclick="addProduct()">+ Add</button>
+      ${p?`<button class="btn line sm" onclick="editProduct('${p.id}')">Rename</button>
+      <button class="btn danger sm" onclick="delProduct('${p.id}')">Remove</button>`:''}`, prodList)}
+    ${collapsiblePanel('variants', 'Variants', v && v.name, `
+      ${p?`<button class="btn primary sm" onclick="addVariant()">+ Add</button>`:''}
+      ${v?`<button class="btn line sm" onclick="editVariant('${v.id}')">Rename</button>
+      <button class="btn danger sm" onclick="delVariant('${v.id}')">Remove</button>`:''}`, varList)}
+    ${v ? treePanel(v) : `<div class="panel">
+      <div class="panel-h"><h3>Tree of Parts</h3></div>
+      <div class="empty">Select a product and variant to build its tree of parts.</div></div>`}
+    ${n ? nodeDetailPanel(n) : `<div class="panel">
+      <div class="panel-h"><h3>Node symptoms &amp; modes</h3></div>
+      <div class="empty">Click a node in the tree of parts to configure its failure symptoms &amp; modes here.</div></div>`}
   </div>`;
 }
+
+/* One catalog cell that folds down to its header bar. Collapsed, the header still
+   names the current selection, so the choice stays visible without the list. */
+function collapsiblePanel(key, title, selName, headBtns, body){
+  const open = !state.collapsed[key];
+  return `<div class="panel ${open?'':'collapsed'}">
+    <div class="panel-h">
+      <button class="collapse-btn" aria-expanded="${open}" title="${open?'Collapse':'Expand'} ${esc(title)}"
+        onclick="toggleCollapse('${key}')">${CHEVRON}</button>
+      <h3>${esc(title)}</h3>
+      ${!open && selName ? `<span class="panel-sel">${esc(selName)}</span>` : ''}
+      <span class="spacer"></span>${headBtns}
+    </div>
+    ${open ? `<div class="panel-b sel-list">${body}</div>` : ''}
+  </div>`;
+}
+function toggleCollapse(key){ state.collapsed[key] = !state.collapsed[key]; render(); }
 function selProduct(id){ state.sel.productId=id; state.sel.variantId=null; state.sel.nodeId=null; render(); }
 function selVariant(id){ state.sel.variantId=id; state.sel.nodeId=null; render(); }
 function selNode(id){ state.sel.nodeId = (state.sel.nodeId===id? null : id); render(); }
@@ -439,14 +453,14 @@ function treePanel(v){
       </li>`).join('')}</ul>`;
   };
   return `<div class="panel">
-    <div class="panel-h"><h3>Tree of Parts — ${esc(v.name)}</h3><span class="spacer"></span>
-      <button class="btn sm line" onclick="addNode('${v.id}',null,'subsystem')">+ Root subsystem</button>
-      <button class="btn sm line" onclick="addNode('${v.id}',null,'component')">+ Root component</button>
+    <div class="panel-h"><h3>Tree of Parts</h3><span class="panel-sel">${esc(v.name)}</span><span class="spacer"></span>
+      <button class="btn sm line" title="Add a root subsystem" onclick="addNode('${v.id}',null,'subsystem')">+ Subsystem</button>
+      <button class="btn sm line" title="Add a root component" onclick="addNode('${v.id}',null,'component')">+ Component</button>
     </div>
     <div class="panel-b tree">
       ${nodesOf(v.id).length ? renderKids(null) : '<div class="empty">Empty tree. Add a root subsystem or component.</div>'}
-      <p class="flow-note" style="margin:12px 0 0">Click a node name to configure its failure symptoms &amp; modes. Names must be unique within this variant. Subsystems can nest; components are leaf nodes.</p>
     </div>
+    <p class="flow-note" style="margin:0;padding:10px 16px 14px">Click a node name to configure its failure symptoms &amp; modes. Names must be unique within this variant. Subsystems can nest; components are leaf nodes.</p>
   </div>`;
 }
 
@@ -458,7 +472,7 @@ function nodeDetailPanel(n){
     <div class="panel-h"><h3>Node · ${esc(nodePath(n))}</h3>
       <span class="badge ${n.type==='subsystem'?'sub':'comp'}">${n.type}</span></div>
     <div class="panel-b">
-      <div class="cols cols-2">
+      <div class="cols cols-fit">
         <div>
           <label class="f">Failure symptoms</label>
           <div style="margin-bottom:8px">${chipList(n.symptoms,'symptoms')}</div>

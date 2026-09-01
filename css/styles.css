@@ -159,8 +159,36 @@ svg.ico-sm{width:15px;height:15px;flex-shrink:0;stroke:currentColor;fill:none;
 .cols{display:grid;gap:20px}
 .cols-3{grid-template-columns:320px 320px 1fr}
 .cols-2{grid-template-columns:1fr 1fr}
+.cols-fit{grid-template-columns:repeat(auto-fit,minmax(180px,1fr))}
 @media(max-width:1140px){.cols-3{grid-template-columns:1fr}}
 @media(max-width:1000px){.cols-2{grid-template-columns:1fr}}
+
+/* ---------- products & variants workspace ----------
+   2x2 band: (0,0) Products (0,1) Variants (1,0) Tree of parts (1,1) Node symptoms.
+   Products/variants are picked once and then collapsed away, so the tree and the
+   node panel keep the lower band and the whole view fits a half-width window. */
+.catalog-grid{grid-template-columns:1fr 1fr;align-items:start}
+.catalog-grid > .panel{margin-bottom:0}
+/* the two upper cells scroll rather than pushing the lower band off-screen */
+.catalog-grid .panel-b.sel-list{max-height:min(34vh,300px);overflow:auto}
+.catalog-grid .panel-b.tree{max-height:min(56vh,620px);overflow:auto}
+@media(max-width:1000px){.catalog-grid{grid-template-columns:1fr}}
+
+/* half-width tree cell: the node toolbar overlays on hover instead of taking
+   width in every row, so deep rows still fit without sideways scrolling */
+.catalog-grid .node-row{position:relative}
+.catalog-grid .node-row .tools{position:absolute;right:3px;top:50%;transform:translateY(-50%);
+  margin-left:0;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-sm);
+  padding:2px 3px;box-shadow:0 1px 4px rgba(20,41,58,.14);pointer-events:none}
+.catalog-grid .node-row:hover .tools,.catalog-grid .node-row.on .tools{pointer-events:auto}
+
+/* collapsible panel header */
+.panel-h .collapse-btn{border:none;background:none;padding:2px;margin:0 -2px 0 -4px;color:var(--slate);
+  display:inline-grid;place-items:center;border-radius:4px}
+.panel-h .collapse-btn:hover{background:var(--line-2);color:var(--navy)}
+.panel-h .collapse-btn .chev{transition:transform .14s}
+.panel.collapsed .collapse-btn .chev{transform:rotate(-90deg)}
+.panel-h .panel-sel{font-size:12.5px;color:var(--slate);max-width:22ch;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
 .btn{background:var(--navy);color:#fff;border:none;border-radius:var(--r-sm);padding:9px 15px;
   font-size:13.5px;font-weight:500}
@@ -212,21 +240,29 @@ table.tbl td.act-cell,table.tbl th.act-cell{text-align:center;width:1%;white-spa
   line-height:1;font-size:10px;padding:0}
 .chip button:hover{background:var(--red)}
 
-/* selectable list (products / variants) */
-.sel-list button.item{display:block;width:100%;text-align:left;background:#fff;border:1px solid var(--line);
-  border-radius:var(--r-sm);padding:10px 12px;margin-bottom:6px;font-size:14px}
+/* selectable list (products / variants)
+   Compact single-line rows: no vertical padding, name left / meta right, so a
+   large catalogue shows many more entries per screen. */
+.panel-b.sel-list{padding:8px}
+.sel-list button.item{display:flex;align-items:baseline;gap:10px;width:100%;text-align:left;background:#fff;
+  border:1px solid var(--line);border-radius:var(--r-sm);padding:0 9px;margin-bottom:2px;
+  font-size:14px;line-height:25px}
 .sel-list button.item:hover{border-color:var(--slate)}
 .sel-list button.item.on{border-color:var(--brand);background:var(--brand-tint);
   box-shadow:inset 3px 0 0 var(--brand)}
-.sel-list .item .nm{font-weight:600}
-.sel-list .item .ds{font-size:12px;color:var(--slate)}
+.sel-list .item .nm{font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sel-list .item .ds{font-size:12px;color:var(--slate);margin-left:auto;flex-shrink:0;
+  max-width:52%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sel-list .empty{padding:14px}
 
 /* ---------- tree of parts ---------- */
 .tree ul{list-style:none;margin:0;padding-left:22px;border-left:1px solid var(--line)}
 .tree > ul{border-left:none;padding-left:0}
-.tree li{position:relative;padding:2px 0}
-.tree ul li::before{content:"";position:absolute;left:-22px;top:17px;width:16px;height:1px;background:var(--line)}
-.node-row{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:var(--r-sm);
+.tree li{position:relative;padding:0}
+/* elbow sits on the row's vertical centre — keep in step with .node-row height */
+.tree ul li::before{content:"";position:absolute;left:-22px;top:14px;width:16px;height:1px;background:var(--line)}
+.tree > ul > li::before{display:none}   /* roots have no parent to connect to */
+.node-row{display:flex;align-items:center;gap:8px;padding:1px 8px;border-radius:var(--r-sm);
   border:1px solid transparent}
 .node-row:hover{background:var(--line-2)}
 .node-row.on{background:var(--brand-tint);border-color:var(--brand-edge)}
@@ -342,6 +378,8 @@ hr.sep{border:none;border-top:1px solid var(--line);margin:14px 0}
   .part-card .ph{flex-wrap:wrap;row-gap:6px}
   .node-row{flex-wrap:wrap;row-gap:4px}
   .node-row .tools{margin-left:0;width:100%;justify-content:flex-start;flex-wrap:wrap}
+  .catalog-grid .node-row .tools{position:static;transform:none;background:none;border:none;
+    box-shadow:none;padding:0;pointer-events:auto}
   .part-card .ph h4{font-size:13px}
   .bar-row .lbl{flex-basis:110px}
   table.tbl{min-width:440px;font-size:13px}
