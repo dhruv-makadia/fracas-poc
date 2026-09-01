@@ -154,6 +154,7 @@ const ICONS = {
 const ACTION_ICONS = {
   view:'<svg class="ico-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-6.6 10-6.6S22 12 22 12s-3.6 6.6-10 6.6S2 12 2 12z"/><circle cx="12" cy="12" r="2.9"/></svg>',
   edit:'<svg class="ico-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 19.5h3.6L19.3 8.3a1.9 1.9 0 0 0 0-2.7l-.9-.9a1.9 1.9 0 0 0-2.7 0L4.5 15.9v3.6z"/><path d="M14.3 6.7l3.6 3.6"/></svg>',
+  trash:'<svg class="ico-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16"/><path d="M10 4h4a1 1 0 0 1 1 1v2H9V5a1 1 0 0 1 1-1z"/><path d="M6.5 7l.9 12a2 2 0 0 0 2 1.9h5.2a2 2 0 0 0 2-1.9l.9-12"/><path d="M10 11v6M14 11v6"/></svg>',
 };
 const CHEVRON = '<svg class="ico-sm chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9.5l6 6 6-6"/></svg>';
 const MS_LOGO = '<svg viewBox="0 0 21 21" aria-hidden="true">'
@@ -374,16 +375,16 @@ function viewCatalog(){
   const p=state.sel.productId ? prodById(state.sel.productId) : null;
   const v=state.sel.variantId ? varById(state.sel.variantId) : null;
 
-  const prodList = DB.products.map(x=>`
-    <button class="item ${x.id===state.sel.productId?'on':''}" onclick="selProduct('${x.id}')">
-      <div class="nm">${esc(x.name)}</div><div class="ds">${esc(x.desc||'')}</div>
-    </button>`).join('') || '<div class="empty">No products yet.</div>';
+  const prodList = DB.products.map(x=>selRow({
+      name:x.name, sub:x.desc||'', on:x.id===state.sel.productId,
+      pick:`selProduct('${x.id}')`, rename:`editProduct('${x.id}')`, remove:`delProduct('${x.id}')`,
+    })).join('') || '<div class="empty">No products yet.</div>';
 
-  const varList = p ? (variantsOf(p.id).map(x=>`
-    <button class="item ${x.id===state.sel.variantId?'on':''}" onclick="selVariant('${x.id}')">
-      <div class="nm">${esc(x.name)}</div>
-      <div class="ds mono">${nodesOf(x.id).length} nodes</div>
-    </button>`).join('') || '<div class="empty">No variants yet.</div>')
+  const varList = p ? (variantsOf(p.id).map(x=>selRow({
+      name:x.name, sub:`${nodesOf(x.id).length} nodes`, subMono:true,
+      on:x.id===state.sel.variantId,
+      pick:`selVariant('${x.id}')`, rename:`editVariant('${x.id}')`, remove:`delVariant('${x.id}')`,
+    })).join('') || '<div class="empty">No variants yet.</div>')
     : '<div class="empty">Select a product.</div>';
 
   const n = state.sel.nodeId ? nodeById(state.sel.nodeId) : null;
@@ -393,20 +394,34 @@ function viewCatalog(){
   <p class="page-sub">Product Family → Variant → hierarchical Tree of Parts, with per-node failure symptoms &amp; modes.
     Collapse the two upper panels once a variant is picked — the tree and node panel then own the view.</p>
   <div class="cols catalog-grid">
-    ${collapsiblePanel('products', 'Products', p && p.name, `
-      <button class="btn primary sm" onclick="addProduct()">+ Add</button>
-      ${p?`<button class="btn line sm" onclick="editProduct('${p.id}')">Rename</button>
-      <button class="btn danger sm" onclick="delProduct('${p.id}')">Remove</button>`:''}`, prodList)}
-    ${collapsiblePanel('variants', 'Variants', v && v.name, `
-      ${p?`<button class="btn primary sm" onclick="addVariant()">+ Add</button>`:''}
-      ${v?`<button class="btn line sm" onclick="editVariant('${v.id}')">Rename</button>
-      <button class="btn danger sm" onclick="delVariant('${v.id}')">Remove</button>`:''}`, varList)}
+    ${collapsiblePanel('products', 'Products', p && p.name,
+      `<button class="btn primary sm" onclick="addProduct()">+ Add</button>`, prodList)}
+    ${collapsiblePanel('variants', 'Variants', v && v.name,
+      p?`<button class="btn primary sm" onclick="addVariant()">+ Add</button>`:'', varList)}
     ${v ? treePanel(v) : `<div class="panel">
       <div class="panel-h"><h3>Tree of Parts</h3></div>
       <div class="empty">Select a product and variant to build its tree of parts.</div></div>`}
     ${n ? nodeDetailPanel(n) : `<div class="panel">
       <div class="panel-h"><h3>Node symptoms &amp; modes</h3></div>
       <div class="empty">Click a node in the tree of parts to configure its failure symptoms &amp; modes here.</div></div>`}
+  </div>`;
+}
+
+/* A selectable products/variants row: name over its sub-line, with that entry's
+   own rename/remove to the right — the actions belong to the row they act on,
+   not to a header bar that only appears once something is selected. */
+function selRow(o){
+  return `<div class="item ${o.on?'on':''}">
+    <button class="item-main" onclick="${o.pick}" title="${esc(o.name)}">
+      <span class="nm">${esc(o.name)}</span>
+      <span class="ds ${o.subMono?'mono':''}">${esc(o.sub)}</span>
+    </button>
+    <span class="row-tools">
+      <button class="icon-btn act" onclick="${o.rename}"
+        title="Rename ${esc(o.name)}" aria-label="Rename ${esc(o.name)}">${ACTION_ICONS.edit}</button>
+      <button class="icon-btn act red" onclick="${o.remove}"
+        title="Remove ${esc(o.name)}" aria-label="Remove ${esc(o.name)}">${ACTION_ICONS.trash}</button>
+    </span>
   </div>`;
 }
 
@@ -444,9 +459,11 @@ function treePanel(v){
           <span class="tools">
             ${n.type==='subsystem'?`<button class="icon-btn" title="Add child subsystem" onclick="addNode('${v.id}','${n.id}','subsystem')">+Sub</button>
             <button class="icon-btn" title="Add child component" onclick="addNode('${v.id}','${n.id}','component')">+Cmp</button>`:''}
-            <button class="icon-btn" onclick="renameNode('${n.id}')">Rename</button>
-            <button class="icon-btn" onclick="moveNode('${n.id}')">Move</button>
-            <button class="icon-btn red" onclick="delNode('${n.id}')">✕</button>
+            <button class="icon-btn" title="Move ${esc(n.name)}" onclick="moveNode('${n.id}')">Move</button>
+            <button class="icon-btn act" onclick="renameNode('${n.id}')"
+              title="Rename ${esc(n.name)}" aria-label="Rename ${esc(n.name)}">${ACTION_ICONS.edit}</button>
+            <button class="icon-btn act red" onclick="delNode('${n.id}')"
+              title="Remove ${esc(n.name)}" aria-label="Remove ${esc(n.name)}">${ACTION_ICONS.trash}</button>
           </span>
         </div>
         ${renderKids(n.id)}

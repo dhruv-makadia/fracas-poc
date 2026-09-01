@@ -241,18 +241,23 @@ table.tbl td.act-cell,table.tbl th.act-cell{text-align:center;width:1%;white-spa
 .chip button:hover{background:var(--red)}
 
 /* selectable list (products / variants)
-   Compact single-line rows: no vertical padding, name left / meta right, so a
-   large catalogue shows many more entries per screen. */
+   Name over its sub-line, that row's own actions on the right. Padding is kept
+   off the row so the two lines still read compactly in a long catalogue. */
 .panel-b.sel-list{padding:8px}
-.sel-list button.item{display:flex;align-items:baseline;gap:10px;width:100%;text-align:left;background:#fff;
-  border:1px solid var(--line);border-radius:var(--r-sm);padding:0 9px;margin-bottom:2px;
-  font-size:14px;line-height:25px}
-.sel-list button.item:hover{border-color:var(--slate)}
-.sel-list button.item.on{border-color:var(--brand);background:var(--brand-tint);
+.sel-list .item{display:flex;align-items:center;gap:6px;background:#fff;
+  border:1px solid var(--line);border-radius:var(--r-sm);margin-bottom:6px;font-size:14px}
+.sel-list .item:last-child{margin-bottom:0}
+.sel-list .item:hover{border-color:var(--slate)}
+.sel-list .item.on{border-color:var(--brand);background:var(--brand-tint);
   box-shadow:inset 3px 0 0 var(--brand)}
-.sel-list .item .nm{font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.sel-list .item .ds{font-size:12px;color:var(--slate);margin-left:auto;flex-shrink:0;
-  max-width:52%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sel-list button.item-main{flex:1;min-width:0;display:block;text-align:left;background:none;
+  border:none;padding:4px 9px;font-size:14px}
+.sel-list .item .nm{display:block;font-weight:600;line-height:1.3;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sel-list .item .ds{display:block;min-height:15px;font-size:11.5px;line-height:1.3;color:var(--slate);
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* row actions: always present, quiet until the row is pointed at */
+.sel-list .row-tools{display:flex;gap:2px;flex-shrink:0;padding-right:5px}
 .sel-list .empty{padding:14px}
 
 /* ---------- tree of parts ---------- */
@@ -267,13 +272,19 @@ table.tbl td.act-cell,table.tbl th.act-cell{text-align:center;width:1%;white-spa
 .node-row:hover{background:var(--line-2)}
 .node-row.on{background:var(--brand-tint);border-color:var(--brand-edge)}
 .node-row .nname{font-weight:500}
-.node-row .tools{margin-left:auto;display:flex;gap:4px;opacity:0;transition:opacity .12s}
+.node-row .tools{margin-left:auto;display:flex;align-items:center;gap:4px;opacity:0;transition:opacity .12s}
 .node-row:hover .tools,.node-row.on .tools{opacity:1}
 .icon-btn{border:1px solid var(--line);background:#fff;border-radius:5px;padding:2px 8px;font-size:11.5px;
   color:var(--ink)}
 .icon-btn:hover{border-color:var(--slate)}
-.icon-btn.act{display:inline-grid;place-items:center;padding:5px;color:var(--slate)}
-.icon-btn.act:hover{border-color:var(--brand);background:var(--brand-tint);color:var(--brand-deep)}
+/* icon-only action (rename / remove) — quiet until its row is pointed at.
+   Shared by the catalog list rows and the tree-of-parts node tools. */
+.icon-btn.act{display:inline-grid;place-items:center;padding:5px;
+  border-color:transparent;background:none;color:#8494a3}
+.icon-btn.act:hover{background:#fff;border-color:var(--brand);color:var(--brand-deep)}
+.icon-btn.act.red:hover{border-color:var(--red);color:var(--red)}
+.sel-list .item:hover .icon-btn.act,
+.node-row:hover .icon-btn.act,.node-row.on .icon-btn.act{color:var(--slate)}
 .icon-btn.red:hover{border-color:var(--red);color:var(--red)}
 .tree .pickbox{width:16px;height:16px;accent-color:var(--brand-deep)}
 input[type=checkbox]{accent-color:var(--brand-deep)}
